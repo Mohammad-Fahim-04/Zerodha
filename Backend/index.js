@@ -8,6 +8,7 @@ const cors = require("cors");
 const HoldingsModel = require("./model/HoldingModel");
 const PositionsModel = require("./model/PositionsModel");
 const OrdersModel = require("./model/OrdersModel");
+const UserModel = require("./model/UserModel");
 
 const PORT = process.env.PORT || 3002;
 const uri = process.env.MONGO_URL;
@@ -34,6 +35,30 @@ app.post("/newOrder", async (req, res) => {
     price: req.body.price,
     mode: req.body.mode,
   });
+
+  app.post("/signup", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const existingUser = await UserModel.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const newUser = new UserModel({
+      name,
+      email,
+      password,
+    });
+
+    await newUser.save();
+
+    res.json({ message: "Signup successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Signup failed" });
+  }
+});
 
   await newOrder.save();
 
